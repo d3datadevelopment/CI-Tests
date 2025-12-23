@@ -1,0 +1,52 @@
+{
+  "name": "d3/mailconfigchecker",
+  "description": "Mail configuration check tool",
+  "type": "oxideshop-module",
+  "keywords": [
+    "oxid",
+    "modules",
+    "eShop",
+    "d3",
+    "E-mail",
+    "configuration",
+    "SMTP",
+    "phpMailer",
+    "SPF",
+    "DMARC",
+    "testing"
+  ],
+  "authors": [
+    {
+      "name": "D3 Data Development (Inh. Thomas Dartsch)",
+      "email": "info@shopmodule.com",
+      "homepage": "https://www.d3data.de",
+      "role": "Owner"
+    }
+  ],
+  "support": {
+    "email": "support@shopmodule.com"
+  },
+  "homepage": "https://www.oxidmodule.com/",
+  "license": [
+    "GPL-3.0-or-later"
+  ],
+  "require": {
+    "php": "^8",
+    "oxid-esales/oxideshop-ce": "7.0 - 7.2",
+    "beberlei/assert": "^3.3"
+  },
+  "require-dev": {
+    "boxblinkracer/phpunuhi": "^1.12"
+  },
+  "autoload": {
+    "psr-4": {
+      "D3\\MailConfigChecker\\": ""
+    }
+  },
+  "scripts": {
+      "php-cs-fixer": "./vendor/bin/php-cs-fixer fix --config=vendor/d3/mailconfigchecker/.php-cs-fixer.php",
+      "phpstan": "./vendor/bin/phpstan --configuration=./vendor/d3/mailconfigchecker/phpstan.neon",
+      "phpunuhi": "./vendor/bin/phpunuhi --configuration=vendor/d3/mailconfigchecker/phpunuhi.xml validate"
+  }
+}
+

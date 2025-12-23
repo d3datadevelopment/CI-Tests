@@ -47,7 +47,7 @@ jobs:
 
       - name: OXID Shop installieren
         run: |
-          composer create-project oxid-esales/oxideshop-project shop dev-b-7.0-ce
+          composer create-project oxid-esales/oxideshop-project shop dev-b-7.1-ce --no-security-blocking
 
       - name: Abhängigkeiten installieren
         working-directory: shop
@@ -67,11 +67,40 @@ jobs:
             --db-name="$DB_NAME" \
             --db-user="$DB_USER" \
             --db-password="$DB_PASS" \
+            --db-port=3306 \
             --shop-url="http://localhost" \
             --shop-directory="$(pwd)" \
-            --admin-email="ci@example.com" \
-            --admin-password="admin"
+            --compile-directory="$(pwd)/tmp" \
+            --language=de
+
+      - name: OXID Benutzer erstellen
+        working-directory: shop
+        run: vendor/bin/oe-console oe:admin:create-user --admin-email=ci@example.com --admin-password=admina
+
+      - name: OXID Theme aktivieren
+        working-directory: shop
+        run: vendor/bin/oe-console oe:theme:activate apex
 
       - name: OXID Status prüfen
         working-directory: shop
         run: vendor/bin/oe-console oe:shop:status
+
+      - name: Plugin-Repository registrieren
+        working-directory: shop
+        run: |
+          composer config repositories.plugin path ../
+
+      - name: Plugin via Composer installieren
+        working-directory: shop
+        run: |
+          composer require d3/mailconfigchecker:@dev --no-interaction
+
+      - name: Plugin aktivieren
+        working-directory: shop
+        run: |
+          vendor/bin/oe-console oe:module:activate d3mailconfigchecker
+
+      - name: Modulstatus prüfen
+        working-directory: shop
+        run: |
+          vendor/bin/oe-console oe:module:list
