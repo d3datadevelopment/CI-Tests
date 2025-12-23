@@ -69,8 +69,8 @@ jobs:
             --db-password="$DB_PASS" \
             --db-port=3306 \
             --shop-url="http://localhost" \
-            --shop-directory="$(pwd)" \
-            --compile-directory="$(pwd)/tmp" \
+            --shop-directory="$(pwd)/source" \
+            --compile-directory="$(pwd)/source/tmp" \
             --language=de
 
       - name: OXID Benutzer erstellen
@@ -104,3 +104,14 @@ jobs:
         working-directory: shop
         run: |
           vendor/bin/oe-console oe:module:list
+
+      - name: PHPUnit installieren
+        working-directory: shop
+        run: |
+          composer require --dev phpunit/phpunit:^10 --no-interaction
+
+      - name: Plugin Tests ausführen
+        working-directory: shop
+        run: |
+          vendor/bin/phpunit ../
+
