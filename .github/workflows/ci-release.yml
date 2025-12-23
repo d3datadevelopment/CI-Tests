@@ -47,7 +47,7 @@ jobs:
 
       - name: OXID Shop installieren
         run: |
-          composer create-project oxid-esales/oxideshop-project shop
+          composer create-project oxid-esales/oxideshop-project shop dev-b-7.0-ce
 
       - name: Abhängigkeiten installieren
         working-directory: shop
