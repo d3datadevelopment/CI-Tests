@@ -41,6 +41,32 @@ jobs:
             date.timezone=Europe/Berlin
           tools: composer:v2
 
+      - name: SourceGuardian Loader installieren
+        run: |
+          PHP_VERSION=$(php -r 'echo PHP_MAJOR_VERSION.".".PHP_MINOR_VERSION;')
+          LOADER=ixed.${PHP_VERSION}.lin
+
+          curl -fsSL https://www.sourceguardian.com/loaders/download/loaders.linux-x86_64.tar.gz -o sg.tar.gz
+          mkdir loaders
+          tar -xzf sg.tar.gz -C ./loaders
+          mkdir -p ~/.php-ext
+          cp loaders/$LOADER ~/.php-ext/
+
+      - name: SourceGuardian Loader aktivieren
+        run: |
+          echo "zend_extension=$HOME/.php-ext/ixed.$(php -r 'echo PHP_MAJOR_VERSION.".".PHP_MINOR_VERSION;').lin" \
+            > $HOME/sourceguardian.ini
+          echo "sourceguardian.enable=1" >> $HOME/sourceguardian.ini
+
+      - name: SourceGuardian PHP ini registrieren
+        run: |
+          PHP_INI_DIR=$(php -i | grep '^Scan this dir for additional .ini files =>' | sed 's/.*=> //')
+          sudo cp $HOME/sourceguardian.ini "$PHP_INI_DIR/99-sourceguardian.ini"
+
+      - name: SourceGuardian prüfen
+        run: |
+          php -v | grep -i sourceguardian
+
       - name: PHP & Composer prüfen
         run: |
           php -v
