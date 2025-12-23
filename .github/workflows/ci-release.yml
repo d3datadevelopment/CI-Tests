@@ -44,3 +44,34 @@ jobs:
           php -v
           composer --version
           php -m | grep intl
+
+      - name: OXID Shop installieren
+        run: |
+          composer create-project oxid-esales/oxideshop-project shop
+
+      - name: Abhängigkeiten installieren
+        working-directory: shop
+        run: |
+          composer install --no-interaction --no-progress
+
+      - name: OXID Setup per CLI
+        working-directory: shop
+        env:
+          DB_HOST: mariadb
+          DB_NAME: oxid
+          DB_USER: oxid
+          DB_PASS: oxid
+        run: |
+          vendor/bin/oe-console oe:setup:shop \
+            --db-host="$DB_HOST" \
+            --db-name="$DB_NAME" \
+            --db-user="$DB_USER" \
+            --db-password="$DB_PASS" \
+            --shop-url="http://localhost" \
+            --shop-directory="$(pwd)" \
+            --admin-email="ci@example.com" \
+            --admin-password="admin"
+
+      - name: OXID Status prüfen
+        working-directory: shop
+        run: vendor/bin/oe-console oe:shop:status
