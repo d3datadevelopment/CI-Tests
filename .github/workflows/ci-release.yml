@@ -1,0 +1,46 @@
+name: OXID Plugin CI
+
+on:
+  push:
+    branches:
+      - 'rel_*'
+      - 'main'
+      - 'master'
+
+jobs:
+  plugin-tests:
+    runs-on: ubuntu-latest
+
+    services:
+      mariadb:
+        image: mariadb:10.6
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: oxid
+          MYSQL_USER: oxid
+          MYSQL_PASSWORD: oxid
+        options: >-
+          --health-cmd="mysqladmin ping --silent"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
+    steps:
+      - name: Repository auschecken
+        uses: actions/checkout@v4
+
+      - name: PHP einrichten
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.1'
+          extensions: mbstring, intl, gd, mysql, zip, curl
+          ini-values: |
+            memory_limit=1G
+            date.timezone=Europe/Berlin
+          tools: composer:v2
+
+      - name: PHP & Composer prüfen
+        run: |
+          php -v
+          composer --version
+          php -m | grep intl
