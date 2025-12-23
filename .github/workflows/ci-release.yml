@@ -98,11 +98,6 @@ jobs:
         run: |
           vendor/bin/oe-console oe:module:activate d3mailconfigchecker
 
-      - name: Modulstatus prüfen
-        working-directory: shop
-        run: |
-          vendor/bin/oe-console oe:module:list
-
       - name: PHPUnit installieren
         working-directory: shop
         run: |
@@ -111,5 +106,5 @@ jobs:
       - name: Plugin Tests ausführen
         working-directory: shop
         run: |
-          vendor/bin/phpunit ../
+          vendor/bin/phpunit --config=vendor/d3/mailconfigchecker --no-coverage
 
