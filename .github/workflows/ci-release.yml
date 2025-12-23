@@ -83,10 +83,6 @@ jobs:
         working-directory: shop
         run: vendor/bin/oe-console oe:theme:activate apex
 
-      - name: OXID Status prüfen
-        working-directory: shop
-        run: vendor/bin/oe-console oe:shop:status
-
       - name: Plugin-Repository registrieren
         working-directory: shop
         run: |
