@@ -57,7 +57,7 @@ jobs:
       - name: OXID Setup per CLI
         working-directory: shop
         env:
-          DB_HOST: mariadb
+          DB_HOST: 127.0.0.1
           DB_NAME: oxid
           DB_USER: oxid
           DB_PASS: oxid
