@@ -147,12 +147,12 @@ jobs:
       - name: Unit Tests ausführen
         working-directory: shop
         run: |
-          vendor/bin/phpunit --config=vendor/d3/mailconfigchecker --no-coverage --bootstrap "$(pwd)/source/bootstrap.php" --testsuite unit
+          vendor/bin/phpunit --fail-on-risky --fail-on-warning --config=vendor/d3/mailconfigchecker --no-coverage --bootstrap "$(pwd)/source/bootstrap.php" --testsuite unit
 
       - name: Integration Tests ausführen
         working-directory: shop
         run: |
-          vendor/bin/phpunit --config=vendor/d3/mailconfigchecker --no-coverage --bootstrap "$(pwd)/source/bootstrap.php" --testsuite integration
+          vendor/bin/phpunit --fail-on-risky --fail-on-warning --config=vendor/d3/mailconfigchecker --no-coverage --bootstrap "$(pwd)/source/bootstrap.php" --testsuite integration
 
   report-to-gitea:
     runs-on: ubuntu-latest
