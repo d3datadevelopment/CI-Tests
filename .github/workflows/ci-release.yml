@@ -153,3 +153,31 @@ jobs:
         working-directory: shop
         run: |
           vendor/bin/phpunit --config=vendor/d3/mailconfigchecker --no-coverage --bootstrap "$(pwd)/source/bootstrap.php" --testsuite integration
+
+      - name: Report SUCCESS to Gitea
+        if: success()
+        run: |
+          curl -X POST \
+            -H "Authorization: token ${{ secrets.GITEA_TOKEN }}" \
+            -H "Content-Type: application/json" \
+            -d '{
+              "state": "success",
+              "context": "ci/github",
+              "description": "CI passed on GitHub",
+              "target_url": "'"${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"'"
+            }' \
+            ${{ vars.GITEA_API }}statuses/${{ github.sha }}
+
+      - name: Report FAILURE to Gitea
+        if: failure()
+        run: |
+          curl -X POST \
+            -H "Authorization: token ${{ secrets.GITEA_TOKEN }}" \
+            -H "Content-Type: application/json" \
+            -d '{
+              "state": "failure",
+              "context": "ci/github",
+              "description": "CI failed on GitHub",
+              "target_url": "'"${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"'"
+            }' \
+            ${{ vars.GITEA_API }}statuses/${{ github.sha }}
