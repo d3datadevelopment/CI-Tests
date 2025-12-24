@@ -13,12 +13,14 @@
       <html outputDirectory="coverage" lowUpperBound="50" highLowerBound="90"/>
     </report>
   </coverage>
-  <testsuite name="unit">
-    <directory>./Tests/Unit</directory>
-  </testsuite>
-  <testsuite name="integration">
-    <directory>./Tests/Integration</directory>
-  </testsuite>
+  <testsuites>
+    <testsuite name="unit">
+      <directory>./Tests/Unit</directory>
+    </testsuite>
+    <testsuite name="integration">
+      <directory>./Tests/Integration</directory>
+    </testsuite>
+  </testsuites>
   <logging/>
   <source>
     <include>
