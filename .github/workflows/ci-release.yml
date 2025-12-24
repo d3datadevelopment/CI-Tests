@@ -154,8 +154,13 @@ jobs:
         run: |
           vendor/bin/phpunit --config=vendor/d3/mailconfigchecker --no-coverage --bootstrap "$(pwd)/source/bootstrap.php" --testsuite integration
 
+  report-to-gitea:
+    runs-on: ubuntu-latest
+    needs: plugin-tests
+    if: always()
+    steps:
       - name: Report SUCCESS to Gitea
-        if: success()
+        if: needs.plugin-tests.result == 'success'
         run: |
           curl -X POST \
             -H "Authorization: token ${{ secrets.GITEA_TOKEN }}" \
@@ -163,13 +168,13 @@ jobs:
             -d '{
               "state": "success",
               "context": "ci/github",
-              "description": "CI passed on GitHub",
+              "description": "CI passed (all matrix jobs)",
               "target_url": "'"${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"'"
             }' \
             ${{ vars.GITEA_API }}statuses/${{ github.sha }}
 
       - name: Report FAILURE to Gitea
-        if: failure()
+        if: needs.plugin-tests.result != 'success'
         run: |
           curl -X POST \
             -H "Authorization: token ${{ secrets.GITEA_TOKEN }}" \
@@ -177,7 +182,7 @@ jobs:
             -d '{
               "state": "failure",
               "context": "ci/github",
-              "description": "CI failed on GitHub",
+              "description": "CI failed (one or more matrix jobs)",
               "target_url": "'"${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"'"
             }' \
             ${{ vars.GITEA_API }}statuses/${{ github.sha }}
