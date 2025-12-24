@@ -27,6 +27,20 @@ jobs:
           --health-timeout=5s
           --health-retries=5
 
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # min
+          - oxid_ref: "dev-b-7.0-ce"
+            php: "8.0"
+
+          # max
+          - oxid_ref: "dev-b-7.4-ce"
+            php: "8.4"
+
+    name: OXID ${{ matrix.oxid_ref }} in PHP ${{ matrix.php }} tests
+
     steps:
       - name: Repository auschecken
         uses: actions/checkout@v4
@@ -34,7 +48,7 @@ jobs:
       - name: PHP einrichten
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.1'
+          php-version: ${{ matrix.php }}
           extensions: mbstring, intl, gd, mysql, zip, curl
           ini-values: |
             memory_limit=1G
@@ -75,7 +89,7 @@ jobs:
 
       - name: OXID Shop installieren
         run: |
-          composer create-project oxid-esales/oxideshop-project shop dev-b-7.1-ce --no-security-blocking
+          composer create-project oxid-esales/oxideshop-project shop ${{ matrix.oxid_ref }} --no-security-blocking
 
       - name: Abhängigkeiten installieren
         working-directory: shop
