@@ -14,7 +14,10 @@
     </report>
   </coverage>
   <testsuite name="unit">
-    <directory>./Tests</directory>
+    <directory>./Tests/Unit</directory>
+  </testsuite>
+  <testsuite name="integration">
+    <directory>./Tests/Integration</directory>
   </testsuite>
   <logging/>
   <source>

@@ -142,10 +142,14 @@ jobs:
       - name: PHPUnit installieren
         working-directory: shop
         run: |
-          composer require --dev phpunit/phpunit:^10 --no-interaction
+          composer require --dev phpunit/phpunit:"^9 || ^10" --no-interaction
 
-      - name: Plugin Tests ausführen
+      - name: Unit Tests ausführen
         working-directory: shop
         run: |
-          vendor/bin/phpunit --config=vendor/d3/mailconfigchecker --no-coverage --bootstrap "$(pwd)/source/bootstrap.php"
+          vendor/bin/phpunit --config=vendor/d3/mailconfigchecker --no-coverage --bootstrap "$(pwd)/source/bootstrap.php" --testsuite unit
 
+      - name: Integration Tests ausführen
+        working-directory: shop
+        run: |
+          vendor/bin/phpunit --config=vendor/d3/mailconfigchecker --no-coverage --bootstrap "$(pwd)/source/bootstrap.php" --testsuite integration
