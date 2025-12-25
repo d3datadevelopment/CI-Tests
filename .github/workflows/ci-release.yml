@@ -45,144 +45,30 @@ jobs:
       - name: Repository auschecken
         uses: actions/checkout@v4
 
-      - name: PHP einrichten
-        uses: shivammathur/setup-php@v2
+      - name: Run OXID tests
+        uses: d3datadevelopment/ci-actions/oxid-plugin-test@dev
         with:
-          php-version: ${{ matrix.php }}
-          extensions: mbstring, intl, gd, mysql, zip, curl
-          ini-values: |
-            memory_limit=1G
-            date.timezone=Europe/Berlin
-          tools: composer:v2
+          php_version: ${{ matrix.php }}
+          oxid_ref: ${{ matrix.oxid_ref }}
+          phpunit_version: "^9 || ^10"
+          sourceguardian: "true"
+          composer_package_name: "d3/mailconfigchecker"
+          oxid_module_id: "d3mailconfigchecker"
+          test_suites: "unit,integration"
 
-      - name: SourceGuardian Loader installieren
-        run: |
-          PHP_VERSION=$(php -r 'echo PHP_MAJOR_VERSION.".".PHP_MINOR_VERSION;')
-          LOADER=ixed.${PHP_VERSION}.lin
-
-          curl -fsSL https://www.sourceguardian.com/loaders/download/loaders.linux-x86_64.tar.gz -o sg.tar.gz
-          mkdir loaders
-          tar -xzf sg.tar.gz -C ./loaders
-          mkdir -p ~/.php-ext
-          cp loaders/$LOADER ~/.php-ext/
-
-      - name: SourceGuardian Loader aktivieren
-        run: |
-          echo "zend_extension=$HOME/.php-ext/ixed.$(php -r 'echo PHP_MAJOR_VERSION.".".PHP_MINOR_VERSION;').lin" \
-            > $HOME/sourceguardian.ini
-          echo "sourceguardian.enable=1" >> $HOME/sourceguardian.ini
-
-      - name: SourceGuardian PHP ini registrieren
-        run: |
-          PHP_INI_DIR=$(php -i | grep '^Scan this dir for additional .ini files =>' | sed 's/.*=> //')
-          sudo cp $HOME/sourceguardian.ini "$PHP_INI_DIR/99-sourceguardian.ini"
-
-      - name: SourceGuardian prüfen
-        run: |
-          php -v | grep -i sourceguardian
-
-      - name: PHP & Composer prüfen
-        run: |
-          php -v
-          composer --version
-          php -m | grep intl
-
-      - name: OXID Shop installieren
-        run: |
-          composer create-project oxid-esales/oxideshop-project shop ${{ matrix.oxid_ref }} --no-security-blocking
-
-      - name: Abhängigkeiten installieren
-        working-directory: shop
-        run: |
-          composer install --no-interaction --no-progress
-
-      - name: OXID Setup per CLI
-        working-directory: shop
-        env:
-          DB_HOST: 127.0.0.1
-          DB_NAME: oxid
-          DB_USER: oxid
-          DB_PASS: oxid
-        run: |
-          vendor/bin/oe-console oe:setup:shop \
-            --db-host="$DB_HOST" \
-            --db-name="$DB_NAME" \
-            --db-user="$DB_USER" \
-            --db-password="$DB_PASS" \
-            --db-port=3306 \
-            --shop-url="http://localhost" \
-            --shop-directory="$(pwd)/source" \
-            --compile-directory="$(pwd)/source/tmp" \
-            --language=de
-
-      - name: OXID Benutzer erstellen
-        working-directory: shop
-        run: vendor/bin/oe-console oe:admin:create-user --admin-email=ci@example.com --admin-password=admina
-
-      - name: OXID Theme aktivieren
-        working-directory: shop
-        run: |
-          vendor/bin/oe-console oe:theme:activate apex || echo "Theme-Aktivierung in dieser OXID-Version nicht verfügbar – übersprungen."
-
-      - name: Plugin-Repository registrieren
-        working-directory: shop
-        run: |
-          composer config repositories.plugin path ../
-
-      - name: Plugin via Composer installieren
-        working-directory: shop
-        run: |
-          composer require d3/mailconfigchecker:@dev --no-interaction
-
-      - name: Plugin aktivieren
-        working-directory: shop
-        run: |
-          vendor/bin/oe-console oe:module:activate d3mailconfigchecker
-
-      - name: PHPUnit installieren
-        working-directory: shop
-        run: |
-          composer require --dev phpunit/phpunit:"^9 || ^10" --no-interaction
-
-      - name: Unit Tests ausführen
-        working-directory: shop
-        run: |
-          vendor/bin/phpunit --fail-on-risky --fail-on-warning --config=vendor/d3/mailconfigchecker --no-coverage --bootstrap "$(pwd)/source/bootstrap.php" --testsuite unit
-
-      - name: Integration Tests ausführen
-        working-directory: shop
-        run: |
-          vendor/bin/phpunit --fail-on-risky --fail-on-warning --config=vendor/d3/mailconfigchecker --no-coverage --bootstrap "$(pwd)/source/bootstrap.php" --testsuite integration
-
-  report-to-gitea:
+  report-status:
     runs-on: ubuntu-latest
     needs: plugin-tests
     if: always()
     steps:
-      - name: Report SUCCESS to Gitea
-        if: needs.plugin-tests.result == 'success'
-        run: |
-          curl -X POST \
-            -H "Authorization: token ${{ secrets.GITEA_TOKEN }}" \
-            -H "Content-Type: application/json" \
-            -d '{
-              "state": "success",
-              "context": "ci/github",
-              "description": "CI passed (all matrix jobs)",
-              "target_url": "'"${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"'"
-            }' \
+      - name: Report CI status
+        uses: d3datadevelopment/ci-actions/status-reporter@dev
+        with:
+          status_endpoint: >
             ${{ vars.GITEA_API }}statuses/${{ github.sha }}
-
-      - name: Report FAILURE to Gitea
-        if: needs.plugin-tests.result != 'success'
-        run: |
-          curl -X POST \
-            -H "Authorization: token ${{ secrets.GITEA_TOKEN }}" \
-            -H "Content-Type: application/json" \
-            -d '{
-              "state": "failure",
-              "context": "ci/github",
-              "description": "CI failed (one or more matrix jobs)",
-              "target_url": "'"${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"'"
-            }' \
-            ${{ vars.GITEA_API }}statuses/${{ github.sha }}
+          auth_token: ${{ secrets.GITEA_TOKEN }}
+          state: ${{ needs.plugin-tests.result }}
+          description: >
+            CI result: ${{ needs.plugin-tests.result }}
+          target_url: >
+            ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
