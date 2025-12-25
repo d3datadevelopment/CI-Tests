@@ -47,7 +47,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Run OXID tests
-        uses: d3datadevelopment/ci-actions/oxid-plugin-test@dev
+        uses: d3datadevelopment/ci-actions/oxid-plugin-test@v1
         with:
           php_version: ${{ matrix.php }}
           oxid_ref: ${{ matrix.oxid_ref }}
@@ -64,7 +64,7 @@ jobs:
     if: always()
     steps:
       - name: Report CI status
-        uses: d3datadevelopment/ci-actions/status-reporter@dev
+        uses: d3datadevelopment/ci-actions/status-reporter@v1
         with:
           api_status_endpoint: "${{ vars.GITEA_API }}${{ github.sha }}"
           auth_token: ${{ secrets.GITEA_TOKEN }}
