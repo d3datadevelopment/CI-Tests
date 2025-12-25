@@ -27,7 +27,6 @@ jobs:
         uses: d3datadevelopment/ci-actions/composer-package-test@v1
         with:
           php_version: ${{ matrix.php }}
-          phpunit_version: "^9 || ^10"
           syntax_check_paths: "Tests"
           test_suites: "unit,integration"
 
