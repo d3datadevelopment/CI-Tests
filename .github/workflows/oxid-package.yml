@@ -31,13 +31,8 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          # min
-          - oxid_ref: "dev-b-7.0-ce"
-            php: "8.0"
-
-          # max
-          - oxid_ref: "dev-b-7.4-ce"
-            php: "8.4"
+          - oxid_ref: "dev-b-7.1-ce"
+            php: "8.1"
 
     name: OXID ${{ matrix.oxid_ref }} in PHP ${{ matrix.php }} tests
 
@@ -48,7 +43,7 @@ jobs:
       DB_PASS: oxid
 
     steps:
-      - name: Repository auschecken
+      - name: checkout repository
         uses: actions/checkout@v4
 
       - name: Run OXID tests
@@ -58,10 +53,10 @@ jobs:
           oxid_ref: ${{ matrix.oxid_ref }}
           phpunit_version: "^9 || ^10"
           sourceguardian: "true"
-          composer_package_name: "d3/mailconfigchecker"
-          oxid_module_id: "d3mailconfigchecker"
+          composer_package_name: "d3/ci-test"
+          oxid_module_id: "d3citest"
           test_suites: "unit,integration"
-          syntax_check_paths: ".,Tests"
+          syntax_check_paths: "Tests"
 
   report-status:
     runs-on: ubuntu-latest
