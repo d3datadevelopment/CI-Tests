@@ -61,6 +61,7 @@ jobs:
           composer_package_name: "d3/mailconfigchecker"
           oxid_module_id: "d3mailconfigchecker"
           test_suites: "unit,integration"
+          syntax_check_paths: "src,tests"
 
   report-status:
     runs-on: ubuntu-latest
